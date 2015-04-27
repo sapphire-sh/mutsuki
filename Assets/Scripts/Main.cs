@@ -2,54 +2,25 @@
 using System.Collections;
 using SocketIO;
 
+
 public class Main : MonoBehaviour {
-	private SocketIOComponent socket;
+	private PacketGateway gateway;
 	
 	// Use this for initialization
-	void Start () {
+	void Start () 
+	{
 		GameObject go = GameObject.Find ("SocketIO");
-		socket = go.GetComponent <SocketIOComponent>();
-
-		socket.On ("chat message", onChatMessage);
-		socket.On("open", onSocketOpen);
-		socket.On("error", onSocketError);
-		socket.On("close", onSocketClose);
-
-		StartCoroutine("BeepBoop");
+		SocketIOComponent socket = go.GetComponent <SocketIOComponent>();
+		gateway = new PacketGateway (socket);
 	}
 
-	private IEnumerator BeepBoop()
+	void OnGUI() 
 	{
-		yield return new WaitForSeconds(1);
-
-		JSONObject payload = new JSONObject(JSONObject.Type.ARRAY);
-		payload.Add ("first");
-		socket.Emit ("chat message", payload);
-
-		yield return null;
-	}
-
-	public void onChatMessage(SocketIOEvent e) {
-		Debug.Log("[SocketIO] ChatMessage received: " + e.name + " " + e.data);
-	}
-
-	public void onSocketOpen(SocketIOEvent e)
-	{
-		Debug.Log("[SocketIO] Open received: " + e.name + " " + e.data);
-	}
-	
-	public void onSocketError(SocketIOEvent e)
-	{
-		Debug.Log("[SocketIO] Error received: " + e.name + " " + e.data);
-	}
-	
-	public void onSocketClose(SocketIOEvent e)
-	{	
-		Debug.Log("[SocketIO] Close received: " + e.name + " " + e.data);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
+		if (GUI.Button (new Rect (10, 10, 50, 50), "ping")) {
+			gateway.ping ();
+		}
+		if (GUI.Button (new Rect (10, 60, 50, 50), "echo")) {
+			gateway.echoDemo ();
+		}
 	}
 }
