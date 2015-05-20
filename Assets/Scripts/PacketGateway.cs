@@ -8,6 +8,18 @@ public class PacketGateway {
 
 	private SocketIOComponent socket;
 
+	public delegate void OnLoginDelegate (JSONObject data);
+	public delegate void OnResponseMapDelegate (JSONObject data);
+	public delegate void OnNewObjectDelegate (JSONObject data);
+	public delegate void OnRemoveObjectDelegate (JSONObject data);
+	public delegate void OnMoveNotifyDelegate (JSONObject data);
+
+	public OnLoginDelegate onLoginDelegate;
+	public OnResponseMapDelegate onResponseMapDelegate;
+	public OnNewObjectDelegate onNewObjectDelegate;
+	public OnRemoveObjectDelegate onRemoveObjectDelegate;
+	public OnMoveNotifyDelegate onMoveNotifyDelegate;
+
 	public PacketGateway(SocketIOComponent socket) 
 	{
 		this.socket = socket;
@@ -17,37 +29,55 @@ public class PacketGateway {
 		socket.On("error", onSocketError);
 		socket.On("close", onSocketClose);
 		
-		// development socket handler
-		socket.On ("ping", onPing);
-		socket.On ("echo", onEcho);
+		// kisaragi socket handler
+		socket.On ("s2c_login", onLogin);
+		socket.On ("s2c_responseMap", onResponseMap);
+		socket.On ("s2c_newObject", onNewObject);
+		socket.On ("s2c_removeObject", onRemoveObject);
+		socket.On ("s2c_moveNotify", onMoveNotify);
 	}
 
-	public void ping() {
-		JSONObject payload = new JSONObject(JSONObject.Type.OBJECT);
-		payload.AddField ("timestamp", (int)(Time.time * 1000));
-		socket.Emit ("ping", payload);
+	// client to server request
+	public void login() {
+		socket.Emit ("login");
+	}
+
+	public void requestMap() {
+		socket.Emit ("c2s_requestMap");
+	}
+
+	public void requestMove(int x, int y) {
+		Debug.Log ("x: " + x + " y: " + y);
+		JSONObject payload = new JSONObject (JSONObject.Type.OBJECT);
+		payload.AddField ("x", x);
+		payload.AddField ("y", y);
+		socket.Emit ("c2s_requestMove", payload);
+	}
+
+	// server to client response
+	public void onLogin(SocketIOEvent e) {
+		Debug.Log ("[SVR] Login = " + e.data);
+		onLoginDelegate (e.data);
 	}
 	
-	public void onPing(SocketIOEvent e) 
-	{
-		int prev = (int)e.data ["timestamp"].n;
-		int now = (int)(Time.time * 1000);
-		int diff = now - prev;
-		string msg = string.Format ("[SVR] Ping(now={0}) = {1}ms", now, diff);
-		Debug.Log (msg);
+	public void onResponseMap(SocketIOEvent e) {
+		Debug.Log ("[SVR] ResponseMap = " + e.data);
+		onResponseMapDelegate (e.data);
 	}
-	
-	public void echoDemo() 
-	{
-		JSONObject payload = new JSONObject(JSONObject.Type.OBJECT);
-		payload.AddField ("foo", "bar");
-		payload.AddField ("timestamp", (int)(Time.time * 1000));
-		socket.Emit ("echo", payload);
+
+	public void onNewObject(SocketIOEvent e) {
+		Debug.Log ("[SVR] NewObject = " + e.data);
+		onNewObjectDelegate (e.data);
 	}
-	
-	public void onEcho(SocketIOEvent e)
-	{
-		Debug.Log ("[SVR] Echo = " + e.data);
+
+	public void onRemoveObject(SocketIOEvent e) {
+		Debug.Log ("[SVR] RemoveObject = " + e.data);
+		onRemoveObjectDelegate (e.data);
+	}
+
+	public void onMoveNotify(SocketIOEvent e) {
+//		Debug.Log ("[SVR] MoveNotify = " + e.data);
+		onMoveNotifyDelegate (e.data);
 	}
 	
 	// socket base handler
