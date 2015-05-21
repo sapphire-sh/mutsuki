@@ -2,15 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using SocketIO;
-using Mutsuki;
 
 public class Main : MonoBehaviour {
 	private static PacketGateway gateway;
 
-	public static MMap map;
+	public static Map map;
 
 	public static int playerId;
-	public static Dictionary<int, MObject> objectDict;
+
+	public GameObject player;
+	public GameObject enemy;
+	
+	public Dictionary<int, MObject> objectDict;
 
 	void Start () 
 	{
@@ -30,28 +33,31 @@ public class Main : MonoBehaviour {
 	}
 
 	void Update() {
-		MObject user = objectDict [playerId];
+		if (map != null) {
+			int x = objectDict[playerId].x;
+			int y = objectDict[playerId].y;
 
-		bool up, down, left, right;
-		up = Input.GetKeyDown ("up");
-		down = Input.GetKeyDown ("down");
-		left = Input.GetKeyDown ("left");
-		right = Input.GetKeyDown ("right");
+			bool up, down, left, right;
+			up = Input.GetKeyDown ("up");
+			down = Input.GetKeyDown ("down");
+			left = Input.GetKeyDown ("left");
+			right = Input.GetKeyDown ("right");
 
-		if (up ^ down) {
-			if (up) {
-				gateway.requestMove (user.x, user.y + 1);
+			if (up ^ down) {
+				if (up) {
+					gateway.requestMove (x, y + 1);
+				}
+				if (down) {
+					gateway.requestMove (x, y - 1);
+				}
 			}
-			if (down) {
-				gateway.requestMove (user.x, user.y - 1);
-			}
-		}
-		if (left ^ right) {
-			if (left) {
-				gateway.requestMove (user.x - 1, user.y);
-			}
-			if (right) {
-				gateway.requestMove (user.x + 1, user.y);
+			if (left ^ right) {
+				if (left) {
+					gateway.requestMove (x - 1, y);
+				}
+				if (right) {
+					gateway.requestMove (x + 1, y);
+				}
 			}
 		}
 	}
@@ -62,16 +68,42 @@ public class Main : MonoBehaviour {
 	}
 
 	public void ResponseMap(JSONObject jsonObject) {
-		map = MMap.CreateComponent (gameObject, jsonObject);
+		GameObject mapObject = GameObject.Find ("Map");
+		map = mapObject.GetComponent<Map> ();
+		map.SetUp (jsonObject);
 	}
 
 	public void NewObject(JSONObject jsonObject) {
-		MObject mObject = MObject.CreateComponent (gameObject, jsonObject);
-		objectDict.Add (mObject.id, mObject);
+		int id = (int)jsonObject.GetField ("id").n;
+		if (!objectDict.ContainsKey (id)) {
+			string name = jsonObject.GetField ("category").str;
+			int x = (int)jsonObject.GetField ("pos").list [0].n;
+			int y = (int)jsonObject.GetField ("pos").list [1].n;
+		
+			GameObject gameObject = null;
+			switch (MObject.GetCategory (name)) {
+			case MObject.Category.PLAYER:
+				gameObject = Instantiate (player);
+				break;
+			case MObject.Category.ENEMY:
+				gameObject = Instantiate (enemy);
+				break;
+			}
+
+			if (gameObject != null) {
+				MObject mObject = gameObject.GetComponent<MObject> ();
+				mObject.SetUp (jsonObject);
+			
+				objectDict.Add (id, mObject);
+			}
+		}
 	}
 
 	public void RemoveObject(JSONObject jsonObject) {
-		objectDict.Remove((int)jsonObject.GetField("id").n);
+		int id = (int)jsonObject.GetField ("id").n;
+		MObject mObject = objectDict [id];
+		Destroy (mObject);
+		objectDict.Remove (id);
 	}
 
 	public void MoveNotify(JSONObject jsonObject) {

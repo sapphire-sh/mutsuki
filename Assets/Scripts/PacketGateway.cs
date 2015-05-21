@@ -76,7 +76,7 @@ public class PacketGateway {
 	}
 
 	public void onMoveNotify(SocketIOEvent e) {
-//		Debug.Log ("[SVR] MoveNotify = " + e.data);
+		Debug.Log ("[SVR] MoveNotify = " + e.data);
 		onMoveNotifyDelegate (e.data);
 	}
 	
