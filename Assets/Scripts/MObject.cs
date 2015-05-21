@@ -71,14 +71,12 @@ namespace Mutsuki {
 
 		public void CreateMap() {
 			GameObject plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
-//			plane.transform.localScale = new Vector3 (width, 1, height);
 			plane.transform.Translate(new Vector3(width / 2.0f, 0.0f, height / 2.0f));
 
 			for (int i = 0; i < width; ++i) {
 				for (int j = 0; j < height; ++j) {
 					switch(data[j, i]) {
 					case 0:
-//						GameObject obstacle = GameObject.CreatePrimitive (PrimitiveType.Cube);
 						break;
 					case 1:
 						GameObject obstacle = GameObject.CreatePrimitive (PrimitiveType.Cube);

@@ -29,26 +29,33 @@ public class Main : MonoBehaviour {
 		gateway.login ();
 	}
 
-	void OnGUI() 
-	{
-		if (GUI.Button (new Rect (60, 10, 50, 50), "up")) {
-			MObject user = objectDict [playerId];
-			gateway.requestMove(user.x, user.y + 1);
+	void Update() {
+		MObject user = objectDict [playerId];
+
+		bool up, down, left, right;
+		up = Input.GetKeyDown ("up");
+		down = Input.GetKeyDown ("down");
+		left = Input.GetKeyDown ("left");
+		right = Input.GetKeyDown ("right");
+
+		if (up ^ down) {
+			if (up) {
+				gateway.requestMove (user.x, user.y + 1);
+			}
+			if (down) {
+				gateway.requestMove (user.x, user.y - 1);
+			}
 		}
-		if (GUI.Button (new Rect (60, 60, 50, 50), "down")) {
-			MObject user = objectDict [playerId];
-			gateway.requestMove(user.x, user.y - 1);
-		}
-		if (GUI.Button (new Rect (10, 60, 50, 50), "left")) {
-			MObject user = objectDict [playerId];
-			gateway.requestMove(user.x - 1, user.y);
-		}
-		if (GUI.Button (new Rect (110, 60, 50, 50), "right")) {
-			MObject user = objectDict [playerId];
-			gateway.requestMove(user.x + 1, user.y);
+		if (left ^ right) {
+			if (left) {
+				gateway.requestMove (user.x - 1, user.y);
+			}
+			if (right) {
+				gateway.requestMove (user.x + 1, user.y);
+			}
 		}
 	}
-	
+
 	public void Login(JSONObject jsonObject) {
 		gateway.requestMap ();
 		playerId = (int)jsonObject.GetField ("id").n;
