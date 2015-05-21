@@ -2,6 +2,25 @@
 using System.Collections;
 using SocketIO;
 
+public enum PacketType {
+	Ping,
+	Echo,
+	EchoAll,
+	
+	RequestMove,
+	MoveNotify,
+	
+	NewObject,
+	RemoveObject,
+	
+	Login,
+	RequestMap,
+	ResponseMap,
+	
+	Connect,
+	Disconnect,
+}
+
 public class PacketGateway {
 	// socket io 사용시 주의사항
 	// 씬이 시작하자마자 통신 시도시 에러 발생 (예 : 처음에 존재하는 객체의 Start()에서 호출)
@@ -39,18 +58,26 @@ public class PacketGateway {
 
 	// client to server request
 	public void login() {
-		socket.Emit ("login");
+		JSONObject payload = new JSONObject (JSONObject.Type.OBJECT);
+		payload.AddField ("packetType", (int)PacketType.Login);
+		Debug.Log ("login : " + payload);
+		socket.Emit ("login", payload);
 	}
 
 	public void requestMap() {
-		socket.Emit ("c2s_requestMap");
+		JSONObject payload = new JSONObject (JSONObject.Type.OBJECT);
+		payload.AddField ("packetType", (int)PacketType.RequestMap);
+		Debug.Log ("requestMap : " + payload);
+		socket.Emit ("c2s_requestMap", payload);
 	}
 
 	public void requestMove(int x, int y) {
 		Debug.Log ("x: " + x + " y: " + y);
 		JSONObject payload = new JSONObject (JSONObject.Type.OBJECT);
+		payload.AddField ("packetType", (int)PacketType.RequestMove);
 		payload.AddField ("x", x);
 		payload.AddField ("y", y);
+		Debug.Log ("requestMove : " + payload);
 		socket.Emit ("c2s_requestMove", payload);
 	}
 

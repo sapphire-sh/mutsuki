@@ -64,7 +64,7 @@ public class Main : MonoBehaviour {
 
 	public void Login(JSONObject jsonObject) {
 		gateway.requestMap ();
-		playerId = (int)jsonObject.GetField ("id").n;
+		playerId = (int)jsonObject.GetField ("movableId").n;
 	}
 
 	public void ResponseMap(JSONObject jsonObject) {
@@ -74,11 +74,11 @@ public class Main : MonoBehaviour {
 	}
 
 	public void NewObject(JSONObject jsonObject) {
-		int id = (int)jsonObject.GetField ("id").n;
+		int id = (int)jsonObject.GetField ("movableId").n;
 		if (!objectDict.ContainsKey (id)) {
-			string name = jsonObject.GetField ("category").str;
-			int x = (int)jsonObject.GetField ("pos").list [0].n;
-			int y = (int)jsonObject.GetField ("pos").list [1].n;
+			string name = jsonObject.GetField ("categoryName").str;
+			int x = (int)jsonObject.GetField ("x").n;
+			int y = (int)jsonObject.GetField ("y").n;
 		
 			GameObject gameObject = null;
 			switch (MObject.GetCategory (name)) {
@@ -100,17 +100,17 @@ public class Main : MonoBehaviour {
 	}
 
 	public void RemoveObject(JSONObject jsonObject) {
-		int id = (int)jsonObject.GetField ("id").n;
+		int id = (int)jsonObject.GetField ("movableId").n;
 		MObject mObject = objectDict [id];
 		Destroy (mObject);
 		objectDict.Remove (id);
 	}
 
 	public void MoveNotify(JSONObject jsonObject) {
-		int objectId = (int)jsonObject.GetField ("id").n;
+		int objectId = (int)jsonObject.GetField ("movableId").n;
 		MObject mObject = objectDict[objectId];
-		int x = (int)jsonObject.GetField ("pos").list [0].n;
-		int y = (int)jsonObject.GetField ("pos").list [1].n;
+		int x = (int)jsonObject.GetField ("x").n;
+		int y = (int)jsonObject.GetField ("y").n;
 		mObject.updatePos (x, y);
 	}
 }

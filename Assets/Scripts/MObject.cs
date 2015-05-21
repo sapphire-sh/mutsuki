@@ -14,9 +14,9 @@ public class MObject : MonoBehaviour {
 
 	public void SetUp(JSONObject jsonObject) {
 		category = GetCategory (jsonObject.GetField ("category").str);
-		id = (int)jsonObject.GetField ("id").n;
-		x = (int)jsonObject.GetField ("pos").list [0].n;
-		y = (int)jsonObject.GetField ("pos").list [1].n;
+		id = (int)jsonObject.GetField ("movableId").n;
+		x = (int)jsonObject.GetField ("x").n;
+		y = (int)jsonObject.GetField ("y").n;
 	}
 
 	public void updatePos (int _x, int _y) {
@@ -31,6 +31,8 @@ public class MObject : MonoBehaviour {
 	public static Category GetCategory(string category) {
 		switch (category) {
 		case "user":
+			return Category.PLAYER;
+		case "player":
 			return Category.PLAYER;
 		case "enemy":
 			return Category.ENEMY;
