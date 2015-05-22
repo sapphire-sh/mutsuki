@@ -79,7 +79,7 @@ public class Main : MonoBehaviour {
 			string name = jsonObject.GetField ("categoryName").str;
 			int x = (int)jsonObject.GetField ("x").n;
 			int y = (int)jsonObject.GetField ("y").n;
-		
+			
 			GameObject gameObject = null;
 			switch (MObject.GetCategory (name)) {
 			case MObject.Category.PLAYER:
@@ -95,6 +95,11 @@ public class Main : MonoBehaviour {
 				mObject.SetUp (jsonObject);
 			
 				objectDict.Add (id, mObject);
+
+				if(id == playerId) {
+					GameObject camera = GameObject.Find ("Main Camera");
+					camera.transform.parent = gameObject.transform;
+				}
 			}
 		}
 	}
