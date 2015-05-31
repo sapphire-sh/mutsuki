@@ -38,10 +38,10 @@ public class Main : MonoBehaviour {
 			int y = objectDict[playerId].y;
 
 			bool up, down, left, right;
-			up = Input.GetKeyDown ("up");
-			down = Input.GetKeyDown ("down");
-			left = Input.GetKeyDown ("left");
-			right = Input.GetKeyDown ("right");
+			up = Input.GetKey ("up");
+			down = Input.GetKey ("down");
+			left = Input.GetKey ("left");
+			right = Input.GetKey ("right");
 
 			if (up ^ down) {
 				if (up) {
@@ -99,6 +99,7 @@ public class Main : MonoBehaviour {
 				if(id == playerId) {
 					GameObject camera = GameObject.Find ("Main Camera");
 					camera.transform.parent = gameObject.transform;
+					camera.transform.localPosition = new Vector3(0.0f, 1.0f, -3.0f);
 				}
 			}
 		}

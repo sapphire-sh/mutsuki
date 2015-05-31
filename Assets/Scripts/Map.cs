@@ -32,7 +32,7 @@ public class Map : MonoBehaviour {
 				case 0:
 					break;
 				case 1:
-					GameObject instance = (GameObject)Instantiate(obstacle, new Vector3(i + 0.5f, 0.0f, j + 0.5f), Quaternion.identity);
+					GameObject instance = (GameObject)Instantiate(obstacle, new Vector3(i + 0.5f, 0.5f, j + 0.5f), Quaternion.identity);
 					instance.transform.parent = plane.transform;
 					break;
 				}

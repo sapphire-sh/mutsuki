@@ -5,6 +5,9 @@ public class MObject : MonoBehaviour {
 	public int id;
 	public int x;
 	public int y;
+
+	private float prevX;
+	private float prevY;
 	
 	public enum Category {
 		NONE,
@@ -15,8 +18,12 @@ public class MObject : MonoBehaviour {
 	public void SetUp(JSONObject jsonObject) {
 		category = GetCategory (jsonObject.GetField ("category").str);
 		id = (int)jsonObject.GetField ("movableId").n;
-		x = (int)jsonObject.GetField ("x").n;
-		y = (int)jsonObject.GetField ("y").n;
+		prevX = jsonObject.GetField ("x").n;
+		prevY = jsonObject.GetField ("y").n;
+		x = (int)prevX;
+		y = (int)prevY;
+
+		transform.position = new Vector3 (x + 0.5f, 0.5f, y + 0.5f);
 	}
 
 	public void updatePos (int _x, int _y) {
@@ -24,8 +31,14 @@ public class MObject : MonoBehaviour {
 		y = _y;
 	}
 
-	void FixedUpdate() {
-		transform.position = new Vector3 (x + 0.5f, 0.0f, y + 0.5f);
+	void Update() {
+		Vector3 direction = new Vector3 (x - prevX, 0.0f, y - prevY);
+		direction *= Time.deltaTime;
+		Debug.Log (direction);
+		transform.Translate (direction);
+
+		prevX = transform.position.x;
+		prevY = transform.position.y;
 	}
 	
 	public static Category GetCategory(string category) {
