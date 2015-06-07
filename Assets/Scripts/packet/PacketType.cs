@@ -7,10 +7,16 @@ namespace Mutsuki {
 		Disconnect,
 		RequestMove,
 		MoveNotify,
+		RequestAttack,
+		RequestEntityStatus,
+		ResponseEntityStatus,
+		AttackNotify,
 		NewObject,
 		RemoveObject,
 		Login,
 		RequestMap,
 		ResponseMap,
+		RequestJumpZone,
+		GameRestart,
 	}
 }

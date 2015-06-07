@@ -2,95 +2,82 @@ using System.Collections.Generic;
 
 namespace Mutsuki {
 	public class PingPacket : BasePacket {
-		public long timestamp { get; }
+		public long timestamp { get; set; }
 
 		public PingPacket() : base(PacketType.Ping) {
 			this.timestamp = 0;
 		}
 
-		public string command() {
-			return "ping";
-		}
-		private JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField("timestamp", this.timestamp);
 			return data;
 		}
-		public void loadJson(var data) {
-			this.timestamp = data.GetField("timestamp").n;
+		public override void loadJson(JSONObject data) {
+			this.timestamp = (long)data.GetField("timestamp").n;
 		}
 	}
 
 	public class EchoPacket : BasePacket {
-		public var data { get; }
+		public JSONObject data { get; set; }
 
 		public EchoPacket() : base(PacketType.Echo) {
 			this.data = null;
 		}
 
-		public string command() {
-			return "echo";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("data", this.data);
+			return data;
 		}
-		public void loadJson(var data) {
+		public override void loadJson(JSONObject data) {
 			// UNDONE
-			this.data = data.GetField ("data").str;
+			this.data = data.GetField ("data");
 		}
 	}
 
 	public class EchoAllPacket : BasePacket {
-		public var data { get; }
+		public JSONObject data { get; set; }
 
 		public EchoAllPacket() : base(PacketType.EchoAll) {
 			this.data = null;
 		}
-		
-		public string command() {
-			return "echoAll";
-		}
-		public JSONObject _generateJson() {
+
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("data", this.data);
+			return data;
 		}
-		public void loadJson(var data) {
+		public override void loadJson(JSONObject data) {
 			// UNDONE
-			this.data = data.GetField ("data").str;
+			this.data = data.GetField ("data");
 		}
 	}
 
 	public class ConnectPacket : BasePacket {
-		public ConnectPacket () : base(PacketType.Connect);
+		public ConnectPacket () : base(PacketType.Connect) {}
 
-		public string command() {
-			return "connect";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			return data;
 		}
-		public void loadJson(var data) {}
+		public override void loadJson(JSONObject data) {}
 	}
 
 	public class DisconnectPacket : BasePacket {
-		public DisconnectPacket () : base(PacketType.Disconnect);
+		public DisconnectPacket () : base(PacketType.Disconnect) {}
 
-		public string command() {
-			return "disconnect";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject();
 			return data;
 		}
-		public void loadJson(var data) {}
+		public override void loadJson(JSONObject data) {}
 	}
 
 	public class RequestMovePacket : BasePacket {
-		public int movableId { get; }
-		public int x { get; }
-		public int y { get; }
+		public int movableId { get; set; }
+		public int x { get; set; }
+		public int y { get; set; }
 
 		public RequestMovePacket() : base(PacketType.RequestMove) {
 			this.movableId = 0;
@@ -98,194 +85,273 @@ namespace Mutsuki {
 			this.y = 0;
 		}
 
-		public string command() {
-			return "c2s_requestMove";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("movableId", this.movableId);
 			data.AddField ("x", this.x);
 			data.AddField ("y", this.y);
 			return data;
 		}
-		public void loadJson(var data) {
-			this.movableId = data.GetField ("movableId").n;
-			this.x = data.GetField ("x").n;
-			this.y = data.GetField ("y").n;
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
+			this.x = (int)data.GetField ("x").n;
+			this.y = (int)data.GetField ("y").n;
 		}
 	}
 
 	public class MoveNotifyPacket : BasePacket {
-		public int movableId { get; }
-		public int x { get; }
-		public int y { get; }
+		public int movableId { get; set; }
+		public int x { get; set; }
+		public int y { get; set; }
 		
 		public MoveNotifyPacket() : base(PacketType.MoveNotify) {
 			this.movableId = 0;
 			this.x = 0;
 			this.y = 0;
 		}
-		
-		public string command() {
-			return "s2c_moveNotify";
-		}
-		public JSONObject _generateJson() {
+
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("movableId", this.movableId);
 			data.AddField ("x", this.x);
 			data.AddField ("y", this.y);
 			return data;
 		}
-		public void loadJson(var data) {
-			this.movableId = data.GetField ("movableId").n;
-			this.x = data.GetField ("x").n;
-			this.y = data.GetField ("y").n;
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
+			this.x = (int)data.GetField ("x").n;
+			this.y = (int)data.GetField ("y").n;
+		}
+	}
+
+	public class RequestAttackPacket : BasePacket {
+		public int movableId { get; set; }
+
+		public RequestAttackPacket() : base(PacketType.RequestAttack) {
+			this.movableId = 0;
+		}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			data.AddField ("movableId", this.movableId);
+			return data;
+		}
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
+		}
+	}
+
+	public class RequestEntityStatusPacket : BasePacket {
+		public int movableId { get; set; }
+
+		public RequestEntityStatusPacket() : base(PacketType.RequestEntityStatus) {
+			this.movableId = 0;
+		}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			data.AddField ("movableId", this.movableId);
+			return data;
+		}
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
+		}
+	}
+
+	public class ResponseEntityStatusPacket : BasePacket {
+		public int x { get; set; }
+		public int y { get; set; }
+		public int zoneId { get; set; }
+		public Category category { get; set; }
+		public int hp { get; set; }
+
+		public ResponseEntityStatusPacket() : base(PacketType.ResponseEntityStatus) {
+			this.x = 0;
+			this.y = 0;
+			this.zoneId = 0;
+			this.category = Category.None;
+			this.hp = 0;
+		}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			data.AddField ("x", this.x);
+			data.AddField ("y", this.y);
+			data.AddField ("zoneId", this.zoneId);
+			data.AddField ("category", (int)this.category);
+			data.AddField ("hp", this.hp);
+			return data;
+		}
+		public override void loadJson(JSONObject data) {
+			this.x = (int)data.GetField ("x").n;
+			this.y = (int)data.GetField ("y").n;
+			this.zoneId = (int)data.GetField ("zoneId").n;
+			this.category = (Category)data.GetField ("category").n;
+			this.hp = (int)data.GetField ("hp").n;
+		}
+	}
+
+	public class AttackNotifyPacket : BasePacket {
+		public int attackerMovableId { get; set; }
+		public int attackedMovableId { get; set; }
+		public int damage { get; set; }
+
+		public AttackNotifyPacket() : base(PacketType.AttackNotify) {
+			this.attackerMovableId = 0;
+			this.attackedMovableId = 0;
+			this.damage = 0;
+		}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			data.AddField ("attackerMovableId", this.attackerMovableId);
+			data.AddField ("attackedMovableId", this.attackedMovableId);
+			data.AddField ("damage", this.damage);
+			return data;
+		}
+		public override void loadJson(JSONObject data) {
+			this.attackerMovableId = (int)data.GetField ("attackerMovableId").n;
+			this.attackedMovableId = (int)data.GetField ("attackedMovableId").n;
+			this.damage = (int)data.GetField ("damage").n;
 		}
 	}
 
 	public class NewObjectPacket : BasePacket {
-		public int movableId { get; }
-		public Category category { get; }
-		public int x { get; }
-		public int y { get; }
-		public int floor { get; }
+		public int movableId { get; set; }
+		public Category category { get; set; }
+		public int x { get; set; }
+		public int y { get; set; }
+		public int zoneId { get; set; }
 
 		public NewObjectPacket() : base(PacketType.NewObject) {
 			this.movableId = 0;
-			this.category = null;
+			this.category = Category.None;
 			this.x = 0;
 			this.y = 0;
-			this.floor = 0;
+			this.zoneId = 0;
 		}
 
-		public string command() {
-			return "s2c_newObject";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("movableId", this.movableId);
-			data.AddField ("category", this.category);
+			data.AddField ("category", (int)this.category);
 			data.AddField ("x", this.x);
 			data.AddField ("y", this.y);
-			data.AddField ("floor", this.floor);
+			data.AddField ("zoneId", this.zoneId);
 			return data;
 		}
-		public void loadJson(JSONObject data) {
-			this.movableId = data.GetField ("movableId").n;
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
 			// TODO
-			this.category = data.GetField ("category").n;
-			this.x = data.GetField ("x").n;
-			this.y = data.GetField ("y").n;
-			this.floor = data.GetField ("floor").n;
+			this.category = (Category)data.GetField ("category").n;
+			this.x = (int)data.GetField ("x").n;
+			this.y = (int)data.GetField ("y").n;
+			this.zoneId = (int)data.GetField ("zoneId").n;
 		}
 	}
 
 	public class RemoveObjectPacket : BasePacket {
-		public int movableId { get; }
+		public int movableId { get; set; }
 
 		public RemoveObjectPacket () : base(PacketType.RemoveObject) {
 			this.movableId = 0;
 		}
 
-		public string command() {
-			return "s2c_removeObject";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("movableId", this.movableId);
 			return data;
 		}
-		public void loadJson(JSONObject data) {
-			this.movableId = data.GetField ("movableId").n;
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
 		}
 	}
 
 	public class LoginPacket : BasePacket {
-		public int movableId { get; }
-		public int x { get; }
-		public int y { get; }
-		public int floor { get; }
-		public int width { get; }
-		public int height { get; }
+		public int movableId { get; set; }
+		public int x { get; set; }
+		public int y { get; set; }
+		public int zoneId { get; set; }
+		public int width { get; set; }
+		public int height { get; set; }
 
 		public LoginPacket() : base(PacketType.Login) {
 			this.movableId = 0;
 			this.x = 0;
 			this.y = 0;
-			this.floor = 0;
+			this.zoneId = 0;
 			this.width = 0;
 			this.height = 0;
 		}
 
-		public string command() {
-			return "s2c_login";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			data.AddField ("movableId", this.movableId);
 			data.AddField ("x", this.x);
 			data.AddField ("y", this.y);
-			data.AddField ("floor", this.floor);
+			data.AddField ("zoneId", this.zoneId);
 			data.AddField ("width", this.width);
 			data.AddField ("height", this.height);
 			return data;
 		}
-		public void loadJson(JSONObject data) {
-			this.movableId = data.GetField ("movableId").n;
-			this.x = data.GetField ("x").n;
-			this.y = data.GetField ("y").n;
-			this.floor = data.GetField ("floor").n;
-			this.width = data.GetField ("width").n;
-			this.height = data.GetField ("height").n;
+		public override void loadJson(JSONObject data) {
+			this.movableId = (int)data.GetField ("movableId").n;
+			this.x = (int)data.GetField ("x").n;
+			this.y = (int)data.GetField ("y").n;
+			this.zoneId = (int)data.GetField ("zoneId").n;
+			this.width = (int)data.GetField ("width").n;
+			this.height = (int)data.GetField ("height").n;
 		}
 	}
 
 	public class RequestMapPacket : BasePacket {
-		public int floor { get; }
+		public int zoneId { get; set; }
 
 		public RequestMapPacket() : base(PacketType.RequestMap) {
-			this.floor = 0;
+			this.zoneId = 0;
 		}
 
-		public string command() {
-			return "c2s_requestMap";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
-			data.AddField ("floor", this.floor);
+			data.AddField ("zoneId", this.zoneId);
 			return data;
 		}
-		public void loadJson(JSONObject data) {
-			this.floor = data.GetField ("floor").n;
+		public override void loadJson(JSONObject data) {
+			this.zoneId = (int)data.GetField ("zoneId").n;
 		}
 	}
 
 	public class ResponseMapPacket : BasePacket {
-		public List<List<TileCode>> data { get; }
-		public int width { get; }
-		public int height { get; }
-		public int floor { get; }
+		public List<List<TileCode>> data { get; set; }
+		public int width { get; set; }
+		public int height { get; set; }
+		public int zoneId { get; set; }
 
 		public ResponseMapPacket() : base(PacketType.ResponseMap) {
 			this.data = new List<List<TileCode>> ();
 			this.width = 0;
 			this.height = 0;
-			this.floor = 0;
+			this.zoneId = 0;
 		}
 
-		public string command() {
-			return "s2c_requestMap";
-		}
-		public JSONObject _generateJson() {
+		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
 			// UNDONE
-			data.AddField ("data", this.data);
+			var _data = new JSONObject ();
+			foreach (var row in this.data) {
+				var _row = new JSONObject();
+				foreach(var cell in row) {
+					_row.Add((int)cell);
+				}
+				_data.Add(_row);
+			}
+			data.AddField ("data", _data);
 			data.AddField ("width", this.width);
 			data.AddField ("height", this.height);
-			data.AddField ("floor", this.floor);
+			data.AddField ("zoneId", this.zoneId);
 			return data;
 		}
-		public void loadJson(JSONObject data) {
+		public override void loadJson(JSONObject data) {
 			var rows = data.GetField ("data");
 			for (int i = 0; i < rows.Count; ++i) {
 				var cols = rows [i];
@@ -293,12 +359,32 @@ namespace Mutsuki {
 				for (int j = 0; j < cols.Count; ++j) {
 					var cell = cols [j];
 					// UNDONE
-					this.data [i].Add (cell.n);
+					this.data [i].Add ((TileCode)cell.n);
 				}
 			}
-			this.width = data.GetField ("width").n;
-			this.height = data.GetField ("height").n;
-			this.floor = data.GetField ("floor").n;
+			this.width = (int)data.GetField ("width").n;
+			this.height = (int)data.GetField ("height").n;
+			this.zoneId = (int)data.GetField ("zoneId").n;
 		}
+	}
+
+	public class RequestJumpZonePacket : BasePacket {
+		public RequestJumpZonePacket() : base(PacketType.RequestJumpZone) {}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			return data;
+		}
+		public override void loadJson(JSONObject data) {}
+	}
+
+	public class GameRestartPacket : BasePacket {
+		public GameRestartPacket() : base(PacketType.GameRestart) {}
+
+		internal override JSONObject _generateJson() {
+			var data = new JSONObject ();
+			return data;
+		}
+		public override void loadJson(JSONObject data) {}
 	}
 }

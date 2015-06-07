@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using SocketIO;
+using Mutsuki;
 
 public class Main : MonoBehaviour {
 	private static PacketGateway gateway;
@@ -15,8 +17,7 @@ public class Main : MonoBehaviour {
 	
 	public Dictionary<int, MObject> objectDict;
 
-	void Start () 
-	{
+	void Start () {
 		GameObject go = GameObject.Find ("SocketIO");
 		SocketIOComponent socket = go.GetComponent <SocketIOComponent>();
 		gateway = new PacketGateway (socket);
@@ -28,8 +29,6 @@ public class Main : MonoBehaviour {
 		gateway.onNewObjectDelegate = NewObject;
 		gateway.onRemoveObjectDelegate = RemoveObject;
 		gateway.onMoveNotifyDelegate = MoveNotify;
-
-		gateway.login ();
 	}
 
 	void Update() {
@@ -62,37 +61,34 @@ public class Main : MonoBehaviour {
 		}
 	}
 
-	public void Login(JSONObject jsonObject) {
+	public void Login(LoginPacket packet) {
 		gateway.requestMap ();
-		playerId = (int)jsonObject.GetField ("movableId").n;
+		playerId = packet.movableId;
 	}
 
-	public void ResponseMap(JSONObject jsonObject) {
+	public void ResponseMap(ResponseMapPacket packet) {
 		GameObject mapObject = GameObject.Find ("Map");
 		map = mapObject.GetComponent<Map> ();
-		map.SetUp (jsonObject);
+		map.SetUp (packet.data);
 	}
 
-	public void NewObject(JSONObject jsonObject) {
-		int id = (int)jsonObject.GetField ("movableId").n;
+	public void NewObject(NewObjectPacket packet) {
+		int id = packet.movableId;
 		if (!objectDict.ContainsKey (id)) {
-			string name = jsonObject.GetField ("categoryName").str;
-			int x = (int)jsonObject.GetField ("x").n;
-			int y = (int)jsonObject.GetField ("y").n;
-			
 			GameObject gameObject = null;
-			switch (MObject.GetCategory (name)) {
-			case MObject.Category.PLAYER:
+
+			switch (packet.category) {
+			case Category.Player:
 				gameObject = Instantiate (player);
 				break;
-			case MObject.Category.ENEMY:
+			case Category.Enemy:
 				gameObject = Instantiate (enemy);
 				break;
 			}
 
 			if (gameObject != null) {
 				MObject mObject = gameObject.GetComponent<MObject> ();
-				mObject.SetUp (jsonObject);
+				mObject.SetUp (packet);
 			
 				objectDict.Add (id, mObject);
 
@@ -105,18 +101,18 @@ public class Main : MonoBehaviour {
 		}
 	}
 
-	public void RemoveObject(JSONObject jsonObject) {
-		int id = (int)jsonObject.GetField ("movableId").n;
+	public void RemoveObject(RemoveObjectPacket packet) {
+		int id = packet.movableId;
 		MObject mObject = objectDict [id];
 		Destroy (mObject);
 		objectDict.Remove (id);
 	}
 
-	public void MoveNotify(JSONObject jsonObject) {
-		int objectId = (int)jsonObject.GetField ("movableId").n;
+	public void MoveNotify(MoveNotifyPacket packet) {
+		int objectId = packet.movableId;
 		MObject mObject = objectDict[objectId];
-		int x = (int)jsonObject.GetField ("x").n;
-		int y = (int)jsonObject.GetField ("y").n;
+		int x = packet.x;
+		int y = packet.y;
 		mObject.updatePos (x, y);
 	}
 }

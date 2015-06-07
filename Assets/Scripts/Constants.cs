@@ -8,6 +8,7 @@ namespace Mutsuki {
 		Enemy,
 		Player,
 		Item,
+		None,
 	}
 
 	public enum TileCode {

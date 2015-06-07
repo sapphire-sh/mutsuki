@@ -1,4 +1,5 @@
 using UnityEngine;
+using Mutsuki;
 
 public class MObject : MonoBehaviour {
 	public Category category;
@@ -8,18 +9,12 @@ public class MObject : MonoBehaviour {
 
 	private float prevX;
 	private float prevY;
-	
-	public enum Category {
-		NONE,
-		PLAYER,
-		ENEMY
-	}
 
-	public void SetUp(JSONObject jsonObject) {
-		category = GetCategory (jsonObject.GetField ("category").str);
-		id = (int)jsonObject.GetField ("movableId").n;
-		prevX = jsonObject.GetField ("x").n;
-		prevY = jsonObject.GetField ("y").n;
+	public void SetUp(NewObjectPacket packet) {
+		category = packet.category;
+		id = packet.movableId;
+		prevX = packet.x;
+		prevY = packet.y;
 		x = (int)prevX;
 		y = (int)prevY;
 
@@ -32,25 +27,13 @@ public class MObject : MonoBehaviour {
 	}
 
 	void Update() {
-		Vector3 direction = new Vector3 (x - prevX, 0.0f, y - prevY);
+/*		Vector3 direction = new Vector3 (x - prevX, 0.0f, y - prevY);
 		direction *= Time.deltaTime;
 		Debug.Log (direction);
-		transform.Translate (direction);
+		transform.Translate (direction);*/
+		transform.position = new Vector3 (x + 0.5f, 0.5f, y + 0.5f);
 
 		prevX = transform.position.x;
 		prevY = transform.position.y;
-	}
-	
-	public static Category GetCategory(string category) {
-		switch (category) {
-		case "user":
-			return Category.PLAYER;
-		case "player":
-			return Category.PLAYER;
-		case "enemy":
-			return Category.ENEMY;
-		default:
-			return Category.NONE;
-		}
 	}
 }

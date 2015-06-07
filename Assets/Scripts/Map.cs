@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
-using System.Collections;
+using System.Collections.Generic;
+using Mutsuki;
 
 public class Map : MonoBehaviour {
 	public GameObject obstacle;
@@ -7,18 +8,17 @@ public class Map : MonoBehaviour {
 	private int width;
 	private int height;
 	
-	private int[,] data;
+	private TileCode[,] data;
 
-	public void SetUp (JSONObject jsonObject) {
-		this.width = (int)jsonObject.GetField("width").n;
-		this.height = (int)jsonObject.GetField("height").n;
+	public void SetUp (List<List<TileCode>> data) {
+		this.width = data.Count;
+		this.height = data [0].Count;
 		
-		this.data = new int[width, height];
-		JSONObject data = jsonObject.GetField ("data");
-		for (int i = 0; i < data.Count; ++i) {
-			JSONObject row = data.list [i];
-			for (int j = 0; j < row.Count; ++j) {
-				int cell = (int)row.list [j].n;
+		this.data = new TileCode[width, height];
+		for(int i = 0; i < data.Count; ++i) {
+			var row = data[i];
+			for(int j = 0; j < row.Count; ++j) {
+				var cell = row[j];
 				this.data[i, j] = cell;
 			}
 		}
@@ -29,9 +29,9 @@ public class Map : MonoBehaviour {
 		for (int i = 0; i < this.width; ++i) {
 			for (int j = 0; j < this.height; ++j) {
 				switch(this.data[j, i]) {
-				case 0:
+				case TileCode.Empty:
 					break;
-				case 1:
+				case TileCode.Obstacle:
 					GameObject instance = (GameObject)Instantiate(obstacle, new Vector3(i + 0.5f, 0.5f, j + 0.5f), Quaternion.identity);
 					instance.transform.parent = plane.transform;
 					break;
