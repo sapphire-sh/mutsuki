@@ -70,6 +70,11 @@ public class Main : MonoBehaviour {
 					map.PrevMap();
 				}
 			}
+
+			if(Input.GetKeyDown("r")) {
+				var packet = PacketFactory.gameRestart();
+				request(packet);
+			}
 		}
 	}
 
@@ -91,6 +96,8 @@ public class Main : MonoBehaviour {
 			RemoveObject ((RemoveObjectPacket)packet);
 		} else if (command == BasePacket.commands [PacketType.MoveNotify]) {
 			MoveNotify ((MoveNotifyPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.AttackNotify]) {
+			AttackNotify ((AttackNotifyPacket)packet);
 		}
 	}
 
@@ -109,8 +116,7 @@ public class Main : MonoBehaviour {
 	}
 
 	public void NewObject(NewObjectPacket packet) {
-		int id = packet.movableId;
-		if (!objectDict.ContainsKey (id)) {
+		if (!objectDict.ContainsKey (packet.movableId)) {
 			GameObject gameObject = null;
 
 			switch (packet.category) {
@@ -128,15 +134,18 @@ public class Main : MonoBehaviour {
 				MObject mObject = gameObject.GetComponent<MObject> ();
 				mObject.SetUp (packet);
 			
-				objectDict.Add (id, mObject);
+				objectDict.Add (packet.movableId, mObject);
 
-				if(id == playerId) {
+				if(packet.movableId == playerId) {
 					GameObject camera = GameObject.Find ("Main Camera");
 					camera.transform.parent = gameObject.transform;
 					camera.transform.localPosition = new Vector3(0.0f, 1.0f, -3.0f);
 				}
 			}
 		}
+
+		var _packet = PacketFactory.requestEntityStatus (packet.movableId);
+		request (_packet);
 	}
 
 	public void RemoveObject(RemoveObjectPacket packet) {
@@ -152,5 +161,13 @@ public class Main : MonoBehaviour {
 		int x = packet.x;
 		int y = packet.y;
 		mObject.updatePos (x, y);
+	}
+
+	public void AttackNotify(AttackNotifyPacket packet) {
+
+	}
+
+	public void ResponseEntityStatus(ResponseEntityStatusPacket packet) {
+
 	}
 }
