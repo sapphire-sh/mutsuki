@@ -29,14 +29,14 @@ public class PacketGateway {
 
 	// client to server request
 	public void request(BasePacket packet) {
-		Debug.Log (packet.command () + ": " + packet.toJson ());
+		Debug.Log ("request " + packet.command () + ": " + packet.toJson ());
 		socket.Emit (packet.command (), packet.toJson ());
 	}
 
 	// server to client response
 	public void onResponse(SocketIOEvent e) {
 		var packet = PacketFactory.createFromJson (e.data);
-		Debug.Log (packet.command() + ": " + packet.toJson ());
+		Debug.Log ("response " + packet.command() + ": " + packet.toJson ());
 		onResponseDelegate (packet);
 	}
 

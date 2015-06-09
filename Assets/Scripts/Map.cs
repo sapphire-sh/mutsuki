@@ -20,7 +20,7 @@ public class Map : MonoBehaviour {
 		
 		this.data = data;
 
-		GameObject plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
+		var plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
 		plane.transform.parent = this.transform;
 		plane.transform.localScale = new Vector3 (width / 10.0f, 1.0f, height / 10.0f);
 		plane.transform.Translate(new Vector3(width / 2.0f, 0.0f, height / 2.0f));
@@ -61,10 +61,35 @@ public class Map : MonoBehaviour {
 		}
 	}
 
-	public void nextMap() {
-		var packet = PacketFactory.requestMap (++zoneId);
+	public bool IsTileCode(int x, int y, TileCode tileCode) {
+		return (data [x, y] == tileCode);
 	}
 
-	public void prevMap() {
+	public void NextMap() {
+		var packet = PacketFactory.requestMap (++zoneId);
+		Main.request (packet);
+		RequestJumpZone();
+	}
+
+	public void PrevMap() {
+		if (zoneId > 1) {
+			var packet = PacketFactory.requestMap (--zoneId);
+			Main.request (packet);
+			RequestJumpZone();
+		} else {
+			Debug.LogError ("zoneId must be greater than 0");
+		}
+	}
+
+	public void RequestJumpZone() {
+		var packet = PacketFactory.requestJumpZone ();
+		Main.request (packet);
+
+		var camera = GameObject.Find ("Main Camera");
+		camera.transform.SetParent (null);
+		for (int i = 0; i < gameObject.transform.childCount; ++i) {
+			var child = gameObject.transform.GetChild (i);
+			GameObject.Destroy (child.gameObject);
+		}
 	}
 }

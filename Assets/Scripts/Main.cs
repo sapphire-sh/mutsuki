@@ -22,6 +22,9 @@ public class Main : MonoBehaviour {
 		SocketIOComponent socket = go.GetComponent <SocketIOComponent>();
 		gateway = new PacketGateway (socket);
 
+		GameObject mapObject = GameObject.Find ("Map");
+		map = mapObject.GetComponent<Map> ();
+
 		objectDict = new Dictionary<int, MObject>();
 
 		gateway.onResponseDelegate = OnResponse;
@@ -56,13 +59,22 @@ public class Main : MonoBehaviour {
 				else {
 					packet = PacketFactory.requestMove(playerId, x + 1, y);
 				}
-				gateway.request (packet);
+				request (packet);
 			}
 
 			if(Input.GetKeyDown ("space")) {
-//				gateway.requestMap (zoneId);
+				if(map.IsTileCode(x, y, TileCode.FloorTop)) {
+					map.NextMap();
+				}
+				else if(map.IsTileCode(x, y, TileCode.FloorBottom)) {
+					map.PrevMap();
+				}
 			}
 		}
+	}
+
+	public static void request(BasePacket packet) {
+		gateway.request (packet);
 	}
 
 	public void OnResponse(BasePacket packet) {
@@ -87,13 +99,12 @@ public class Main : MonoBehaviour {
 	}
 
 	public void Login(LoginPacket packet) {
-		gateway.request (PacketFactory.requestMap (0));
+		var _packet = PacketFactory.requestMap (0);
+		request (_packet);
 		playerId = packet.movableId;
 	}
 
 	public void ResponseMap(ResponseMapPacket packet) {
-		GameObject mapObject = GameObject.Find ("Map");
-		map = mapObject.GetComponent<Map> ();
 		map.SetUp (packet.width, packet.height, packet.zoneId, packet.data);
 	}
 
@@ -105,9 +116,11 @@ public class Main : MonoBehaviour {
 			switch (packet.category) {
 			case Category.Player:
 				gameObject = Instantiate (player);
+				gameObject.transform.SetParent(map.transform);
 				break;
 			case Category.Enemy:
 				gameObject = Instantiate (enemy);
+				gameObject.transform.SetParent(map.transform);
 				break;
 			}
 
