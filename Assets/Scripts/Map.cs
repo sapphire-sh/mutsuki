@@ -9,22 +9,16 @@ public class Map : MonoBehaviour {
 	
 	private int width;
 	private int height;
+
+	private int zoneId;
 	
 	private TileCode[,] data;
 
-	public void SetUp (List<List<TileCode>> data) {
-		this.width = data [0].Count;
-		this.height = data.Count;
+	public void SetUp (int width, int height, int zoneId, TileCode[,] data) {
+		this.width = width;
+		this.height = height;
 		
-		this.data = new TileCode[width, height];
-		for(int i = 0; i < this.height; ++i) {
-			var row = data[i];
-			for(int j = 0; j < this.width; ++j) {
-				var cell = row[j];
-				this.data[j, i] = cell;
-			}
-		}
-		Debug.Log (this.data);
+		this.data = data;
 
 		GameObject plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
 		plane.transform.parent = this.transform;
@@ -65,5 +59,12 @@ public class Map : MonoBehaviour {
 				}
 			}
 		}
+	}
+
+	public void nextMap() {
+		var packet = PacketFactory.requestMap (++zoneId);
+	}
+
+	public void prevMap() {
 	}
 }

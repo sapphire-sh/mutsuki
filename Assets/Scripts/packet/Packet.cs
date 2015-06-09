@@ -322,13 +322,13 @@ namespace Mutsuki {
 	}
 
 	public class ResponseMapPacket : BasePacket {
-		public List<List<TileCode>> data { get; set; }
+		public TileCode[,] data { get; set; }
 		public int width { get; set; }
 		public int height { get; set; }
 		public int zoneId { get; set; }
 
 		public ResponseMapPacket() : base(PacketType.ResponseMap) {
-			this.data = new List<List<TileCode>> ();
+			this.data = new TileCode[0, 0];
 			this.width = 0;
 			this.height = 0;
 			this.zoneId = 0;
@@ -336,11 +336,11 @@ namespace Mutsuki {
 
 		internal override JSONObject _generateJson() {
 			var data = new JSONObject ();
-			// UNDONE
 			var _data = new JSONObject ();
-			foreach (var row in this.data) {
+			for(int i = 0; i < this.height; ++i) {
 				var _row = new JSONObject();
-				foreach(var cell in row) {
+				for(int j = 0; j < this.width; ++j) {
+					var cell = this.data[j, i];
 					_row.Add((int)cell);
 				}
 				_data.Add(_row);
@@ -352,19 +352,19 @@ namespace Mutsuki {
 			return data;
 		}
 		public override void loadJson(JSONObject data) {
-			var rows = data.GetField ("data");
-			for (int i = 0; i < rows.Count; ++i) {
-				var cols = rows [i];
-				this.data.Add (new List<TileCode> ());
-				for (int j = 0; j < cols.Count; ++j) {
-					var cell = cols [j];
-					// UNDONE
-					this.data [i].Add ((TileCode)cell.n);
-				}
-			}
 			this.width = (int)data.GetField ("width").n;
 			this.height = (int)data.GetField ("height").n;
 			this.zoneId = (int)data.GetField ("zoneId").n;
+			this.data = new TileCode[this.width, this.height];
+
+			var rows = data.GetField ("data");
+			for (int i = 0; i < this.height; ++i) {
+				var cols = rows [i];
+				for (int j = 0; j < this.width; ++j) {
+					var cell = cols [j];
+					this.data[j, i] = (TileCode)cell.n;
+				}
+			}
 		}
 	}
 

@@ -24,11 +24,7 @@ public class Main : MonoBehaviour {
 
 		objectDict = new Dictionary<int, MObject>();
 
-		gateway.onLoginDelegate = Login;
-		gateway.onResponseMapDelegate = ResponseMap;
-		gateway.onNewObjectDelegate = NewObject;
-		gateway.onRemoveObjectDelegate = RemoveObject;
-		gateway.onMoveNotifyDelegate = MoveNotify;
+		gateway.onResponseDelegate = OnResponse;
 	}
 
 	void Update() {
@@ -37,39 +33,68 @@ public class Main : MonoBehaviour {
 			int y = objectDict[playerId].y;
 
 			bool up, down, left, right;
-			up = Input.GetKey ("up");
-			down = Input.GetKey ("down");
-			left = Input.GetKey ("left");
-			right = Input.GetKey ("right");
+			up = Input.GetKeyDown ("up");
+			down = Input.GetKeyDown ("down");
+			left = Input.GetKeyDown ("left");
+			right = Input.GetKeyDown ("right");
 
 			if (up ^ down) {
+				RequestMovePacket packet;
 				if (up) {
-					gateway.requestMove (x, y + 1);
+					packet = PacketFactory.requestMove(playerId, x, y + 1);
 				}
-				if (down) {
-					gateway.requestMove (x, y - 1);
+				else {
+					packet = PacketFactory.requestMove (playerId, x, y - 1);
 				}
+				gateway.request (packet);
 			}
 			if (left ^ right) {
+				RequestMovePacket packet;
 				if (left) {
-					gateway.requestMove (x - 1, y);
+					packet = PacketFactory.requestMove(playerId, x - 1, y);
 				}
-				if (right) {
-					gateway.requestMove (x + 1, y);
+				else {
+					packet = PacketFactory.requestMove(playerId, x + 1, y);
 				}
+				gateway.request (packet);
+			}
+
+			if(Input.GetKeyDown ("space")) {
+//				gateway.requestMap (zoneId);
 			}
 		}
 	}
 
+	public void OnResponse(BasePacket packet) {
+		var command = packet.command ();
+		if (command == BasePacket.commands [PacketType.Connect]) {
+			Connect ((ConnectPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.Login]) {
+			Login ((LoginPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.ResponseMap]) {
+			ResponseMap ((ResponseMapPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.NewObject]) {
+			NewObject ((NewObjectPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.RemoveObject]) {
+			RemoveObject ((RemoveObjectPacket)packet);
+		} else if (command == BasePacket.commands [PacketType.MoveNotify]) {
+			MoveNotify ((MoveNotifyPacket)packet);
+		}
+	}
+
+	public void Connect(ConnectPacket packet) {
+		Debug.Log ("onConnect: " + packet.toJson ());
+	}
+
 	public void Login(LoginPacket packet) {
-		gateway.requestMap ();
+		gateway.request (PacketFactory.requestMap (0));
 		playerId = packet.movableId;
 	}
 
 	public void ResponseMap(ResponseMapPacket packet) {
 		GameObject mapObject = GameObject.Find ("Map");
 		map = mapObject.GetComponent<Map> ();
-		map.SetUp (packet.data);
+		map.SetUp (packet.width, packet.height, packet.zoneId, packet.data);
 	}
 
 	public void NewObject(NewObjectPacket packet) {

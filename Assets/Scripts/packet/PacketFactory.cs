@@ -83,7 +83,7 @@ namespace Mutsuki {
 			return packet;
 		}
 
-		public static ResponseMapPacket responseMap(List<List<TileCode>> data, int width, int height, int zoneId) {
+		public static ResponseMapPacket responseMap(TileCode[,] data, int width, int height, int zoneId) {
 			var packet = new ResponseMapPacket ();
 			packet.data = data;
 			packet.width = width;
