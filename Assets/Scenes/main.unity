@@ -313,6 +313,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   obstacle: {fileID: 146946, guid: 64e7752f384c8498da308f22d3edafa7, type: 2}
+  stairsUp: {fileID: 104268, guid: 2299229bfbdcf49bebcd1c9c80151e42, type: 2}
+  stairsDown: {fileID: 174122, guid: 6c8791ea3e46e41718a1c725181a79d6, type: 2}
 --- !u!4 &788338544
 Transform:
   m_ObjectHideFlags: 0

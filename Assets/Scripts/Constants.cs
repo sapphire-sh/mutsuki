@@ -14,7 +14,13 @@ namespace Mutsuki {
 	public enum TileCode {
 		Empty,
 		Obstacle,
-		Player,
-		Enemy,
+		FloorUp,
+		FloorDown,
+		FloorLeft,
+		FloorRight,
+		FloorTop,
+		FloorBottom,
+		LevelStart,
+		LevelGoal,
 	}
 }
