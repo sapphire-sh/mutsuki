@@ -72,7 +72,7 @@ public class Map : MonoBehaviour {
 	}
 
 	public void PrevMap() {
-		if (zoneId > 1) {
+		if (zoneId > 0) {
 			var packet = PacketFactory.requestMap (--zoneId);
 			Main.request (packet);
 			RequestJumpZone();
