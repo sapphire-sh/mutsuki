@@ -21,7 +21,8 @@ public class Main : MonoBehaviour {
 	public static Queue<NewObjectPacket> newObjectQueue;
 	public static Queue<RemoveObjectPacket> removeObjectQueue;
 
-	public bool IsRequestMapSent;
+	public static bool IsRequestMapSent;
+	public static bool IsGameStarted;
 
 	void Start () {
 		GameObject go = GameObject.Find ("SocketIO");
@@ -30,6 +31,9 @@ public class Main : MonoBehaviour {
 
 		GameObject mapObject = GameObject.Find ("Map");
 		map = mapObject.GetComponent<Map> ();
+
+		GameObject mainCamera = GameObject.Find ("Main Camera");
+		mainCamera.transform.LookAt (new Vector3 (0, 0, 0));
 
 		objectDict = new Dictionary<int, MObject> ();
 		movementQueue = new Queue<MoveNotifyPacket> ();
@@ -137,6 +141,7 @@ public class Main : MonoBehaviour {
 
 	public void ResponseMap(ResponseMapPacket packet) {
 		IsRequestMapSent = false;
+		IsGameStarted = true;
 		removeAllObjects();
 		map.SetUp (packet.width, packet.height, packet.zoneId, packet.data);
 		while (removeObjectQueue.Count > 0) {
@@ -179,6 +184,12 @@ public class Main : MonoBehaviour {
 				
 				objectDict.Add (packet.movableId, mObject);
 			}
+		}
+	}
+
+	void OnGUI() {
+		if (IsGameStarted && !objectDict.ContainsKey(playerId)) {
+			GUI.Label (new Rect (100, 100, 300, 50), "Game Over\nPress \"r\" to restart");
 		}
 	}
 

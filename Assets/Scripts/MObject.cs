@@ -33,7 +33,11 @@ public class MObject : MonoBehaviour {
 		}
 		cooltime = 0.0f;
 
-		transform.localPosition = (pos + new Vector3 (0.5f, 0.5f, 0.5f));
+		if (category == Category.Player) {
+			transform.localPosition = (pos + new Vector3 (0.5f, 0.0f, 0.5f));
+		} else {
+			transform.localPosition = (pos + new Vector3 (0.5f, 0.5f, 0.5f));
+		}
 	}
 
 	void Update() {
