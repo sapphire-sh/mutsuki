@@ -235,6 +235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 110400, guid: 679272b0ccfae4eb9b45f54c50acb412, type: 2}
   enemy: {fileID: 118208, guid: f54059577cecb4578abcea539d19c195, type: 2}
+  IsRequestMapSent: 0
 --- !u!1001 &539336775
 Prefab:
   m_ObjectHideFlags: 0

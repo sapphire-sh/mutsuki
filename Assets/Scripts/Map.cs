@@ -28,7 +28,7 @@ public class Map : MonoBehaviour {
 
 		var plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
 		var meshRenderer = plane.GetComponent<MeshRenderer> ();
-		meshRenderer.material = (Material)Resources.Load ("Materials/Plane");
+		meshRenderer.material = (Material)Resources.Load ("Materials/Empty");
 		plane.transform.parent = this.transform;
 		plane.transform.localScale = new Vector3 (width / 10.0f, 1.0f, height / 10.0f);
 		plane.transform.Translate(new Vector3(width / 2.0f, 0.0f, height / 2.0f));
