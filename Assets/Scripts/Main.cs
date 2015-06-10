@@ -15,7 +15,9 @@ public class Main : MonoBehaviour {
 	public GameObject player;
 	public GameObject enemy;
 	
-	public Dictionary<int, MObject> objectDict;
+	public static Dictionary<int, MObject> objectDict;
+	
+	public static Queue<MoveNotifyPacket> movementQueue;
 
 	void Start () {
 		GameObject go = GameObject.Find ("SocketIO");
@@ -26,54 +28,69 @@ public class Main : MonoBehaviour {
 		map = mapObject.GetComponent<Map> ();
 
 		objectDict = new Dictionary<int, MObject>();
+		movementQueue = new Queue<MoveNotifyPacket> ();
 
 		gateway.onResponseDelegate = OnResponse;
 	}
 
 	void Update() {
-		if (map != null) {
-			int x = objectDict[playerId].x;
-			int y = objectDict[playerId].y;
+		if (map != null && objectDict.ContainsKey(playerId)) {
+			var player = objectDict[playerId];
+			int x = (int)player.pos.x;
+			int y = (int)player.pos.z;
 
-			bool up, down, left, right;
-			up = Input.GetKeyDown ("up");
-			down = Input.GetKeyDown ("down");
-			left = Input.GetKeyDown ("left");
-			right = Input.GetKeyDown ("right");
+//			Debug.Log(x + " " + y);
 
-			if (up ^ down) {
-				RequestMovePacket packet;
-				if (up) {
-					packet = PacketFactory.requestMove(playerId, x, y + 1);
-				}
-				else {
-					packet = PacketFactory.requestMove (playerId, x, y - 1);
-				}
-				gateway.request (packet);
-			}
-			if (left ^ right) {
-				RequestMovePacket packet;
-				if (left) {
-					packet = PacketFactory.requestMove(playerId, x - 1, y);
-				}
-				else {
-					packet = PacketFactory.requestMove(playerId, x + 1, y);
-				}
-				request (packet);
-			}
+			if(player.status == MObject.Status.Stop) {
+				bool up, down, left, right;
+				up = Input.GetKeyDown ("up");
+				down = Input.GetKeyDown ("down");
+				left = Input.GetKeyDown ("left");
+				right = Input.GetKeyDown ("right");
 
-			if(Input.GetKeyDown ("space")) {
-				if(map.IsTileCode(x, y, TileCode.FloorTop)) {
-					map.NextMap();
+				if (up ^ down) {
+					RequestMovePacket packet;
+					if (up) {
+						packet = PacketFactory.requestMove(playerId, x, y + 1);
+					}
+					else {
+						packet = PacketFactory.requestMove (playerId, x, y - 1);
+					}
+					gateway.request (packet);
 				}
-				else if(map.IsTileCode(x, y, TileCode.FloorBottom)) {
-					map.PrevMap();
+				if (left ^ right) {
+					RequestMovePacket packet;
+					if (left) {
+						packet = PacketFactory.requestMove(playerId, x - 1, y);
+					}
+					else {
+						packet = PacketFactory.requestMove(playerId, x + 1, y);
+					}
+					request (packet);
+				}
+
+				if(Input.GetKeyDown ("space")) {
+					map.RequestJumpZone();
 				}
 			}
 
 			if(Input.GetKeyDown("r")) {
 				var packet = PacketFactory.gameRestart();
 				request(packet);
+			}
+		}
+
+		while(movementQueue.Count > 0) {
+			var packet = movementQueue.Peek();
+			if(objectDict.ContainsKey(packet.movableId)) {
+				var mObject = objectDict[packet.movableId];
+				var target = new Vector3(packet.x, 0.0f, packet.y);
+				if(mObject.updateTarget(target)) {
+					movementQueue.Dequeue();
+				}
+				else {
+					break;
+				}
 			}
 		}
 	}
@@ -109,6 +126,10 @@ public class Main : MonoBehaviour {
 		var _packet = PacketFactory.requestMap (0);
 		request (_packet);
 		playerId = packet.movableId;
+
+		foreach (var entry in objectDict) {
+			Destroy (entry.Value);
+		}
 	}
 
 	public void ResponseMap(ResponseMapPacket packet) {
@@ -135,12 +156,6 @@ public class Main : MonoBehaviour {
 				mObject.SetUp (packet);
 			
 				objectDict.Add (packet.movableId, mObject);
-
-				if(packet.movableId == playerId) {
-					GameObject camera = GameObject.Find ("Main Camera");
-					camera.transform.parent = gameObject.transform;
-					camera.transform.localPosition = new Vector3(0.0f, 1.0f, -3.0f);
-				}
 			}
 		}
 
@@ -149,18 +164,12 @@ public class Main : MonoBehaviour {
 	}
 
 	public void RemoveObject(RemoveObjectPacket packet) {
-		int id = packet.movableId;
-		MObject mObject = objectDict [id];
-		Destroy (mObject);
-		objectDict.Remove (id);
+		Destroy (objectDict [packet.movableId]);
+		objectDict.Remove (packet.movableId);
 	}
 
 	public void MoveNotify(MoveNotifyPacket packet) {
-		int objectId = packet.movableId;
-		MObject mObject = objectDict[objectId];
-		int x = packet.x;
-		int y = packet.y;
-		mObject.updatePos (x, y);
+		movementQueue.Enqueue (packet);
 	}
 
 	public void AttackNotify(AttackNotifyPacket packet) {

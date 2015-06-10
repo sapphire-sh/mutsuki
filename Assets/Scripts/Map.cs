@@ -7,25 +7,28 @@ public class Map : MonoBehaviour {
 	public GameObject stairsUp;
 	public GameObject stairsDown;
 	
-	private int width;
-	private int height;
+	public static int width;
+	public static int height;
 
-	private int zoneId;
+	public static int zoneId;
 	
 	private TileCode[,] data;
 
-	public void SetUp (int width, int height, int zoneId, TileCode[,] data) {
-		this.width = width;
-		this.height = height;
+	public void SetUp (int _width, int _height, int _zoneId, TileCode[,] data) {
+		width = _width;
+		height = _height;
+		zoneId = _zoneId;
 		
 		this.data = data;
 
 		var plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
+		var meshRenderer = plane.GetComponent<MeshRenderer> ();
+		meshRenderer.material = (Material)Resources.Load ("Materials/Plane");
 		plane.transform.parent = this.transform;
 		plane.transform.localScale = new Vector3 (width / 10.0f, 1.0f, height / 10.0f);
 		plane.transform.Translate(new Vector3(width / 2.0f, 0.0f, height / 2.0f));
-		for (int i = 0; i < this.width; ++i) {
-			for (int j = 0; j < this.height; ++j) {
+		for (int i = 0; i < width; ++i) {
+			for (int j = 0; j < height; ++j) {
 				switch(this.data[i, j]) {
 				case TileCode.Empty:
 					break;
@@ -65,31 +68,13 @@ public class Map : MonoBehaviour {
 		return (data [x, y] == tileCode);
 	}
 
-	public void NextMap() {
-		var packet = PacketFactory.requestMap (++zoneId);
-		Main.request (packet);
-		RequestJumpZone();
-	}
-
-	public void PrevMap() {
-		if (zoneId > 0) {
-			var packet = PacketFactory.requestMap (--zoneId);
-			Main.request (packet);
-			RequestJumpZone();
-		} else {
-			Debug.LogError ("zoneId must be greater than 0");
-		}
-	}
-
 	public void RequestJumpZone() {
 		var packet = PacketFactory.requestJumpZone ();
 		Main.request (packet);
 
-		var camera = GameObject.Find ("Main Camera");
-		camera.transform.SetParent (null);
-		for (int i = 0; i < gameObject.transform.childCount; ++i) {
+/*		for (int i = 0; i < gameObject.transform.childCount; ++i) {
 			var child = gameObject.transform.GetChild (i);
 			GameObject.Destroy (child.gameObject);
-		}
+		}*/
 	}
 }

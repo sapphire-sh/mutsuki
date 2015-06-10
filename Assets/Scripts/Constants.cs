@@ -28,7 +28,7 @@ namespace Mutsuki {
 		public const float ENEMY_COOLTIME_THINK = 0.5f;
 		public const float ENEMY_COOLTIME_MOVE = 0.3f;
 		public const int ENEMY_HP = 2;
-		public const float PLAYER_COOLTIME_MOVE = 0.1f;
+		public const float PLAYER_COOLTIME_MOVE = 0.3f;
 		public const int PLAYER_HP = 3;
 		public const int PLAYER_ATTACK = 1;
 		public const int PLAYER_ATTACK_RANGE = 5;

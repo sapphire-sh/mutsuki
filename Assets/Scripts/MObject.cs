@@ -4,36 +4,71 @@ using Mutsuki;
 public class MObject : MonoBehaviour {
 	public Category category;
 	public int id;
-	public int x;
-	public int y;
 
-	private float prevX;
-	private float prevY;
+	public Vector3 pos;
 
-	public void SetUp(NewObjectPacket packet) {
-		category = packet.category;
-		id = packet.movableId;
-		prevX = packet.x;
-		prevY = packet.y;
-		x = (int)prevX;
-		y = (int)prevY;
+	private int hp;
+	private float cooltime;
 
-		transform.position = new Vector3 (x + 0.5f, 0.5f, y + 0.5f);
+	public Vector3 targetPos;
+
+	public enum Status {
+		Stop,
+		Move,
 	}
 
-	public void updatePos (int _x, int _y) {
-		x = _x;
-		y = _y;
+	public Status status;
+
+	public void SetUp(NewObjectPacket packet) {
+		status = Status.Stop;
+
+		category = packet.category;
+		id = packet.movableId;
+		pos = new Vector3 (packet.x, 0.0f, packet.y);
+
+		if (category == Category.Player) {
+			hp = Constants.PLAYER_HP;
+		} else {
+			hp = Constants.ENEMY_HP;
+		}
+		cooltime = 0.0f;
+
+		transform.localPosition = (pos + new Vector3 (0.5f, 0.5f, 0.5f));
 	}
 
 	void Update() {
-/*		Vector3 direction = new Vector3 (x - prevX, 0.0f, y - prevY);
-		direction *= Time.deltaTime;
-		Debug.Log (direction);
-		transform.Translate (direction);*/
-		transform.position = new Vector3 (x + 0.5f, 0.5f, y + 0.5f);
+		if (cooltime > 0.0f) {
+			var deltaTime = Time.deltaTime;
+			if (cooltime < deltaTime) {
+				deltaTime = cooltime;
+			}
+			var diff = targetPos - pos;
+			if (category == Category.Player) {
+				diff *= (deltaTime / cooltime);
+			} else {
+				diff *= (deltaTime / cooltime);
+			}
+			pos += diff;
+			transform.Translate (diff);
+			cooltime -= deltaTime;
+		} else {
+			status = Status.Stop;
+		}
+	}
 
-		prevX = transform.position.x;
-		prevY = transform.position.y;
+	public bool updateTarget(Vector3 targetPos) {
+		if (cooltime > 0.0f) {
+			return false;
+		} else {
+			this.targetPos = targetPos;
+			if(category == Category.Player) {
+				cooltime = Constants.PLAYER_COOLTIME_MOVE;
+			}
+			else {
+				cooltime = Constants.ENEMY_COOLTIME_MOVE;
+			}
+			status = Status.Move;
+			return true;
+		}
 	}
 }
