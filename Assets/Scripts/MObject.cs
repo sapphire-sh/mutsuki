@@ -56,6 +56,13 @@ public class MObject : MonoBehaviour {
 		}
 	}
 
+	void OnMouseDown() {
+		if (category == Category.Enemy) {
+			var packet = PacketFactory.requestAttack(id);
+			Main.request (packet);
+		}
+	}
+
 	public bool updateTarget(Vector3 targetPos) {
 		if (cooltime > 0.0f) {
 			return false;
