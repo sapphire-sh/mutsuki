@@ -7,7 +7,7 @@ public class MObject : MonoBehaviour {
 
 	public Vector3 pos;
 
-	private int hp;
+	public int hp;
 	private float cooltime;
 
 	public Vector3 targetPos;
@@ -56,6 +56,23 @@ public class MObject : MonoBehaviour {
 		}
 	}
 
+	private Vector3 nameplatePos;
+	private string nameplateStr;
+
+	void OnGUI() {
+		nameplatePos = Camera.main.WorldToScreenPoint(gameObject.transform.position);
+		nameplateStr = "object_" + id + "\n" + hp + "/";
+		switch (category) {
+		case Category.Player:
+			nameplateStr += Constants.PLAYER_HP;
+			break;
+		case Category.Enemy:
+			nameplateStr += Constants.ENEMY_HP;
+			break;
+		}
+		GUI.Label(new Rect(nameplatePos.x + 10, (Screen.height - nameplatePos.y - 36), 100, 50), nameplateStr);
+	}
+	
 	void OnMouseDown() {
 		if (category == Category.Enemy) {
 			var packet = PacketFactory.requestAttack(id);

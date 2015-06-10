@@ -12,14 +12,14 @@ public class Map : MonoBehaviour {
 
 	public static int zoneId;
 	
-	private TileCode[,] data;
+	public static TileCode[,] data;
 
-	public void SetUp (int _width, int _height, int _zoneId, TileCode[,] data) {
+	public void SetUp (int _width, int _height, int _zoneId, TileCode[,] _data) {
 		width = _width;
 		height = _height;
 		zoneId = _zoneId;
 		
-		this.data = data;
+		data = _data;
 
 		var prevPlane = gameObject.transform.FindChild ("Plane");
 		if (prevPlane != null) {
@@ -34,7 +34,7 @@ public class Map : MonoBehaviour {
 		plane.transform.Translate(new Vector3(width / 2.0f, 0.0f, height / 2.0f));
 		for (int i = 0; i < width; ++i) {
 			for (int j = 0; j < height; ++j) {
-				switch(this.data[i, j]) {
+				switch(data[i, j]) {
 				case TileCode.Empty:
 					break;
 				case TileCode.Obstacle: {

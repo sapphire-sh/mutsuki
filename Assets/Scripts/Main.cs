@@ -18,6 +18,10 @@ public class Main : MonoBehaviour {
 	public static Dictionary<int, MObject> objectDict;
 	
 	public static Queue<MoveNotifyPacket> movementQueue;
+	public static Queue<NewObjectPacket> newObjectQueue;
+	public static Queue<RemoveObjectPacket> removeObjectQueue;
+
+	public bool IsRequestMapSent;
 
 	void Start () {
 		GameObject go = GameObject.Find ("SocketIO");
@@ -27,8 +31,10 @@ public class Main : MonoBehaviour {
 		GameObject mapObject = GameObject.Find ("Map");
 		map = mapObject.GetComponent<Map> ();
 
-		objectDict = new Dictionary<int, MObject>();
+		objectDict = new Dictionary<int, MObject> ();
 		movementQueue = new Queue<MoveNotifyPacket> ();
+		newObjectQueue = new Queue<NewObjectPacket> ();
+		removeObjectQueue = new Queue<RemoveObjectPacket> ();
 
 		gateway.onResponseDelegate = OnResponse;
 	}
@@ -68,16 +74,16 @@ public class Main : MonoBehaviour {
 				}
 
 				if(Input.GetKeyDown ("space")) {
-					removeAllObjects();
-					map.RequestJumpZone();
+					if(Map.data[x, y] == TileCode.FloorBottom || Map.data[x, y] == TileCode.FloorTop) {
+						map.RequestJumpZone();
+					}
 				}
 			}
-
-			if(Input.GetKeyDown("r")) {
-				removeAllObjects();
-				var packet = PacketFactory.gameRestart();
-				request(packet);
-			}
+		}
+		
+		if(Input.GetKeyDown("r")) {
+			var packet = PacketFactory.gameRestart();
+			request(packet);
 		}
 
 		while(movementQueue.Count > 0) {
@@ -126,43 +132,66 @@ public class Main : MonoBehaviour {
 		var _packet = PacketFactory.requestMap (0);
 		request (_packet);
 		playerId = packet.movableId;
-
-		foreach (var entry in objectDict) {
-			Destroy (entry.Value);
-		}
+		IsRequestMapSent = true;
 	}
 
 	public void ResponseMap(ResponseMapPacket packet) {
+		IsRequestMapSent = false;
+		removeAllObjects();
 		map.SetUp (packet.width, packet.height, packet.zoneId, packet.data);
+		while (removeObjectQueue.Count > 0) {
+			var _packet = removeObjectQueue.Dequeue();
+			ResolveRemoveObject(_packet);
+		}
+		while (newObjectQueue.Count > 0) {
+			var _packet = newObjectQueue.Dequeue ();
+			ResolveNewObject(_packet);
+		}
 	}
 
 	public void NewObject(NewObjectPacket packet) {
+		if (IsRequestMapSent) {
+			newObjectQueue.Enqueue (packet);
+		} else {
+			ResolveNewObject (packet);
+		}
+	}
+
+	public void ResolveNewObject(NewObjectPacket packet) {
 		if (!objectDict.ContainsKey (packet.movableId)) {
 			GameObject gameObject = null;
-
+			
 			switch (packet.category) {
 			case Category.Player:
 				gameObject = Instantiate (player);
-				gameObject.transform.SetParent(map.transform);
+				gameObject.transform.SetParent (map.transform);
 				break;
 			case Category.Enemy:
 				gameObject = Instantiate (enemy);
-				gameObject.transform.SetParent(map.transform);
+				gameObject.transform.SetParent (map.transform);
 				break;
 			}
-
+			
 			if (gameObject != null) {
 				MObject mObject = gameObject.GetComponent<MObject> ();
 				mObject.name = "object_" + packet.movableId;
 				mObject.SetUp (packet);
-
+				
 				objectDict.Add (packet.movableId, mObject);
 			}
 		}
 	}
 
 	public void RemoveObject(RemoveObjectPacket packet) {
-		Destroy (GameObject.Find("object_" + packet.movableId));
+		if (IsRequestMapSent) {
+			removeObjectQueue.Enqueue (packet);
+		} else {
+			ResolveRemoveObject (packet);
+		}
+	}
+
+	public void ResolveRemoveObject(RemoveObjectPacket packet) {
+		Destroy (GameObject.Find ("object_" + packet.movableId));
 		objectDict.Remove (packet.movableId);
 	}
 
@@ -171,13 +200,19 @@ public class Main : MonoBehaviour {
 	}
 
 	public void AttackNotify(AttackNotifyPacket packet) {
-
+		var obj = objectDict[packet.attackedMovableId];
+		if (obj.hp > packet.damage) {
+			obj.hp -= packet.damage;
+		} else {
+			obj.hp = 0;
+		}
 	}
 
 	private void removeAllObjects() {
-		foreach(var entry in objectDict) {
-			var obj = GameObject.Find("object_" + entry.Value.id);
+		foreach(var entry in new List<MObject>(objectDict.Values)) {
+			var obj = GameObject.Find("object_" + entry.id);
 			Destroy(obj);
+			objectDict.Remove(entry.id);
 		}
 	}
 }
