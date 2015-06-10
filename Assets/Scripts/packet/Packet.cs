@@ -158,39 +158,6 @@ namespace Mutsuki {
 		}
 	}
 
-	public class ResponseEntityStatusPacket : BasePacket {
-		public int x { get; set; }
-		public int y { get; set; }
-		public int zoneId { get; set; }
-		public Category category { get; set; }
-		public int hp { get; set; }
-
-		public ResponseEntityStatusPacket() : base(PacketType.ResponseEntityStatus) {
-			this.x = 0;
-			this.y = 0;
-			this.zoneId = 0;
-			this.category = Category.None;
-			this.hp = 0;
-		}
-
-		internal override JSONObject _generateJson() {
-			var data = new JSONObject ();
-			data.AddField ("x", this.x);
-			data.AddField ("y", this.y);
-			data.AddField ("zoneId", this.zoneId);
-			data.AddField ("category", (int)this.category);
-			data.AddField ("hp", this.hp);
-			return data;
-		}
-		public override void loadJson(JSONObject data) {
-			this.x = (int)data.GetField ("x").n;
-			this.y = (int)data.GetField ("y").n;
-			this.zoneId = (int)data.GetField ("zoneId").n;
-			this.category = (Category)data.GetField ("category").n;
-			this.hp = (int)data.GetField ("hp").n;
-		}
-	}
-
 	public class AttackNotifyPacket : BasePacket {
 		public int attackerMovableId { get; set; }
 		public int attackedMovableId { get; set; }

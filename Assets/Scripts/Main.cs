@@ -39,8 +39,6 @@ public class Main : MonoBehaviour {
 			int x = (int)player.pos.x;
 			int y = (int)player.pos.z;
 
-//			Debug.Log(x + " " + y);
-
 			if(player.status == MObject.Status.Stop) {
 				bool up, down, left, right;
 				up = Input.GetKeyDown ("up");
@@ -70,11 +68,13 @@ public class Main : MonoBehaviour {
 				}
 
 				if(Input.GetKeyDown ("space")) {
+					removeAllObjects();
 					map.RequestJumpZone();
 				}
 			}
 
 			if(Input.GetKeyDown("r")) {
+				removeAllObjects();
 				var packet = PacketFactory.gameRestart();
 				request(packet);
 			}
@@ -153,18 +153,16 @@ public class Main : MonoBehaviour {
 
 			if (gameObject != null) {
 				MObject mObject = gameObject.GetComponent<MObject> ();
+				mObject.name = "object_" + packet.movableId;
 				mObject.SetUp (packet);
-			
+
 				objectDict.Add (packet.movableId, mObject);
 			}
 		}
-
-		var _packet = PacketFactory.requestEntityStatus (packet.movableId);
-		request (_packet);
 	}
 
 	public void RemoveObject(RemoveObjectPacket packet) {
-		Destroy (objectDict [packet.movableId]);
+		Destroy (GameObject.Find("object_" + packet.movableId));
 		objectDict.Remove (packet.movableId);
 	}
 
@@ -176,7 +174,10 @@ public class Main : MonoBehaviour {
 
 	}
 
-	public void ResponseEntityStatus(ResponseEntityStatusPacket packet) {
-
+	private void removeAllObjects() {
+		foreach(var entry in objectDict) {
+			var obj = GameObject.Find("object_" + entry.Value.id);
+			Destroy(obj);
+		}
 	}
 }

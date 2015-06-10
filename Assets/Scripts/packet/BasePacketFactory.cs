@@ -40,10 +40,6 @@ namespace Mutsuki {
 				return new MoveNotifyPacket();
 			case PacketType.RequestAttack:
 				return new RequestAttackPacket();
-			case PacketType.RequestEntityStatus:
-				return new RequestEntityStatusPacket();
-			case PacketType.ResponseEntityStatus:
-				return new ResponseEntityStatusPacket();
 			case PacketType.AttackNotify:
 				return new AttackNotifyPacket();
 			case PacketType.NewObject:

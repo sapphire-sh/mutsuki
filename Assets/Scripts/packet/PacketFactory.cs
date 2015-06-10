@@ -42,22 +42,6 @@ namespace Mutsuki {
 			return packet;
 		}
 
-		public static RequestEntityStatusPacket requestEntityStatus(int movableId) {
-			var packet = new RequestEntityStatusPacket ();
-			packet.movableId = movableId;
-			return packet;
-		}
-
-		public static ResponseEntityStatusPacket responseEntityStatus(int x, int y, int zoneId, Category category, int hp) {
-			var packet = new ResponseEntityStatusPacket ();
-			packet.x = x;
-			packet.y = y;
-			packet.zoneId = zoneId;
-			packet.category = category;
-			packet.hp = hp;
-			return packet;
-		}
-
 		public static AttackNotifyPacket attackNotify(int attackerId, int attackedId, int damage) {
 			var packet = new AttackNotifyPacket ();
 			packet.attackerMovableId = attackerId;

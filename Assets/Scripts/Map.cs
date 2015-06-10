@@ -21,6 +21,11 @@ public class Map : MonoBehaviour {
 		
 		this.data = data;
 
+		var prevPlane = gameObject.transform.FindChild ("Plane");
+		if (prevPlane != null) {
+			GameObject.Destroy (prevPlane.gameObject);
+		}
+
 		var plane = GameObject.CreatePrimitive (PrimitiveType.Plane);
 		var meshRenderer = plane.GetComponent<MeshRenderer> ();
 		meshRenderer.material = (Material)Resources.Load ("Materials/Plane");
@@ -71,10 +76,5 @@ public class Map : MonoBehaviour {
 	public void RequestJumpZone() {
 		var packet = PacketFactory.requestJumpZone ();
 		Main.request (packet);
-
-/*		for (int i = 0; i < gameObject.transform.childCount; ++i) {
-			var child = gameObject.transform.GetChild (i);
-			GameObject.Destroy (child.gameObject);
-		}*/
 	}
 }
