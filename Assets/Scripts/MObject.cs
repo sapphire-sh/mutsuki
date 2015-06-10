@@ -2,21 +2,28 @@ using UnityEngine;
 using Mutsuki;
 
 public class MObject : MonoBehaviour {
+	[HideInInspector]
 	public Category category;
+	[HideInInspector]
 	public int id;
-
+	
+	[HideInInspector]
 	public Vector3 pos;
-
+	
+	[HideInInspector]
 	public int hp;
 	private float cooltime;
-
+	
+	[HideInInspector]
 	public Vector3 targetPos;
-
+	
+	[HideInInspector]
 	public enum Status {
 		Stop,
 		Move,
 	}
-
+	
+	[HideInInspector]
 	public Status status;
 
 	public void SetUp(NewObjectPacket packet) {
