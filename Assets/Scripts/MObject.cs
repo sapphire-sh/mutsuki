@@ -52,30 +52,22 @@ public class MObject : MonoBehaviour {
 		}
 	}
 
-	private float actionTime = 0.0f;
-
 	void Update() {
 		if (category == Category.Player) {
-			Debug.Log(status);
+			Debug.Log(status + " " + Time.time);
 			switch(status) {
 			case Status.Move:
 				animator.SetBool("move", true);
+				status = Status.Stop;
 				break;
 			case Status.Attack:
 				animator.SetBool("attack", true);
+				status = Status.Stop;
 				break;
 			case Status.Stop:
 				animator.SetBool("move", false);
 				animator.SetBool("attack", false);
 				break;
-			}
-
-			if(actionTime > 0.0f) {
-				actionTime -= Time.deltaTime;
-			}
-			else {
-				status = Status.Stop;
-				actionTime = 2.0f;
 			}
 		}
 
