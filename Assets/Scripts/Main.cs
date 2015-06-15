@@ -49,38 +49,36 @@ public class Main : MonoBehaviour {
 			int x = (int)player.pos.x;
 			int y = (int)player.pos.z;
 
-			if(player.status == MObject.Status.Stop) {
-				bool up, down, left, right;
-				up = Input.GetKeyDown ("up");
-				down = Input.GetKeyDown ("down");
-				left = Input.GetKeyDown ("left");
-				right = Input.GetKeyDown ("right");
+			bool up, down, left, right;
+			up = Input.GetKeyDown ("up");
+			down = Input.GetKeyDown ("down");
+			left = Input.GetKeyDown ("left");
+			right = Input.GetKeyDown ("right");
 
-				if (up ^ down) {
-					RequestMovePacket packet;
-					if (up) {
-						packet = PacketFactory.requestMove(playerId, x, y + 1);
-					}
-					else {
-						packet = PacketFactory.requestMove (playerId, x, y - 1);
-					}
-					gateway.request (packet);
+			if (up ^ down) {
+				RequestMovePacket packet;
+				if (up) {
+					packet = PacketFactory.requestMove(playerId, x, y + 1);
 				}
-				if (left ^ right) {
-					RequestMovePacket packet;
-					if (left) {
-						packet = PacketFactory.requestMove(playerId, x - 1, y);
-					}
-					else {
-						packet = PacketFactory.requestMove(playerId, x + 1, y);
-					}
-					request (packet);
+				else {
+					packet = PacketFactory.requestMove (playerId, x, y - 1);
 				}
+				gateway.request (packet);
+			}
+			if (left ^ right) {
+				RequestMovePacket packet;
+				if (left) {
+					packet = PacketFactory.requestMove(playerId, x - 1, y);
+				}
+				else {
+					packet = PacketFactory.requestMove(playerId, x + 1, y);
+				}
+				request (packet);
+			}
 
-				if(Input.GetKeyDown ("space")) {
-					if(Map.data[x, y] == TileCode.FloorBottom || Map.data[x, y] == TileCode.FloorTop) {
-						map.RequestJumpZone();
-					}
+			if(Input.GetKeyDown ("space")) {
+				if(Map.data[x, y] == TileCode.FloorBottom || Map.data[x, y] == TileCode.FloorTop) {
+					map.RequestJumpZone();
 				}
 			}
 		}
@@ -145,10 +143,12 @@ public class Main : MonoBehaviour {
 		removeAllObjects();
 		map.SetUp (packet.width, packet.height, packet.zoneId, packet.data);
 		while (removeObjectQueue.Count > 0) {
+			Debug.Log("remove " + removeObjectQueue.Count);
 			var _packet = removeObjectQueue.Dequeue();
 			ResolveRemoveObject(_packet);
 		}
 		while (newObjectQueue.Count > 0) {
+			Debug.Log("new " + newObjectQueue.Count);
 			var _packet = newObjectQueue.Dequeue ();
 			ResolveNewObject(_packet);
 		}
@@ -211,11 +211,13 @@ public class Main : MonoBehaviour {
 	}
 
 	public void AttackNotify(AttackNotifyPacket packet) {
-		var obj = objectDict[packet.attackedMovableId];
-		if (obj.hp > packet.damage) {
-			obj.hp -= packet.damage;
+		var attacker = objectDict [packet.attackerMovableId];
+		attacker.status = MObject.Status.Attack;
+		var attacked = objectDict [packet.attackedMovableId];
+		if (attacked.hp > packet.damage) {
+			attacked.hp -= packet.damage;
 		} else {
-			obj.hp = 0;
+			attacked.hp = 0;
 		}
 	}
 

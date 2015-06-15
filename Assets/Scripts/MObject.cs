@@ -15,23 +15,28 @@ public class MObject : MonoBehaviour {
 	private float cooltime;
 	
 	[HideInInspector]
-	public Vector3 targetPos;
-	
-	[HideInInspector]
 	public enum Status {
 		Stop,
 		Move,
+		Attack,
 	}
 	
 	[HideInInspector]
 	public Status status;
+	
+	[HideInInspector]
+	public Animator animator;
 
 	public void SetUp(NewObjectPacket packet) {
-		status = Status.Stop;
-
 		category = packet.category;
 		id = packet.movableId;
 		pos = new Vector3 (packet.x, 0.0f, packet.y);
+
+		if (category == Category.Player) {
+			animator = GetComponent<Animator> ();
+		}
+
+		status = Status.Stop;
 
 		if (category == Category.Player) {
 			hp = Constants.PLAYER_HP;
@@ -47,23 +52,50 @@ public class MObject : MonoBehaviour {
 		}
 	}
 
+	private float actionTime = 0.0f;
+
 	void Update() {
+		if (category == Category.Player) {
+			Debug.Log(status);
+			switch(status) {
+			case Status.Move:
+				animator.SetBool("move", true);
+				break;
+			case Status.Attack:
+				animator.SetBool("attack", true);
+				break;
+			case Status.Stop:
+				animator.SetBool("move", false);
+				animator.SetBool("attack", false);
+				break;
+			}
+
+			if(actionTime > 0.0f) {
+				actionTime -= Time.deltaTime;
+			}
+			else {
+				status = Status.Stop;
+				actionTime = 2.0f;
+			}
+		}
+
 		if (cooltime > 0.0f) {
 			var deltaTime = Time.deltaTime;
 			if (cooltime < deltaTime) {
 				deltaTime = cooltime;
 			}
-			var diff = targetPos - pos;
+			var diff = new Vector3 (0.0f, 0.0f, deltaTime);
 			if (category == Category.Player) {
-				diff *= (deltaTime / cooltime);
+				diff /= Constants.PLAYER_COOLTIME_MOVE;
 			} else {
-				diff *= (deltaTime / cooltime);
+				diff /= Constants.ENEMY_COOLTIME_MOVE;
 			}
-			pos += diff;
 			transform.Translate (diff);
 			cooltime -= deltaTime;
-		} else {
-			status = Status.Stop;
+
+			if (cooltime > 0.0f) {
+				status = Status.Move;
+			}
 		}
 	}
 
@@ -91,18 +123,39 @@ public class MObject : MonoBehaviour {
 		}
 	}
 
+	private static Vector3 axis = new Vector3(0.0f, 1.0f, 0.0f);
+
 	public bool updateTarget(Vector3 targetPos) {
 		if (cooltime > 0.0f) {
 			return false;
-		} else {
-			this.targetPos = targetPos;
+		}
+		else {
+			var diff = this.pos - targetPos;
+			float rotation = transform.localRotation.eulerAngles.y;
+			if(diff.x > 0.99f) {
+				rotation = 270.0f - rotation;
+				this.pos += new Vector3(-1.0f, 0.0f, 0.0f);
+			}
+			else if(diff.x < -0.99f) {
+				rotation = 90.0f - rotation;
+				this.pos += new Vector3(1.0f, 0.0f, 0.0f);
+			}
+			else if(diff.z > 0.99f) {
+				rotation = 180.0f - rotation;
+				this.pos += new Vector3(0.0f, 0.0f, -1.0f);
+			} 	
+			else if(diff.z < -0.99f) {
+				rotation = 0.0f - rotation;
+				this.pos += new Vector3(0.0f, 0.0f, 1.0f);
+			}
+			transform.Rotate(axis, rotation);
+
 			if(category == Category.Player) {
 				cooltime = Constants.PLAYER_COOLTIME_MOVE;
 			}
 			else {
 				cooltime = Constants.ENEMY_COOLTIME_MOVE;
 			}
-			status = Status.Move;
 			return true;
 		}
 	}

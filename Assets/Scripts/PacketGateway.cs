@@ -5,8 +5,6 @@ using SocketIO;
 using Mutsuki;
 
 public class PacketGateway {
-	// socket io 사용시 주의사항
-	// 씬이 시작하자마자 통신 시도시 에러 발생 (예 : 처음에 존재하는 객체의 Start()에서 호출)
 	private SocketIOComponent socket;
 
 	public delegate void OnResponseDelegate(BasePacket packet);
